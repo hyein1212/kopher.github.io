@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>肌タイプ診断テスト</title>
+  <style>
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .container {
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      max-width: 520px;
+      width: 100%;
+      padding: 40px;
+      border: 1px solid #f0f0f0;
+      animation: slideUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* イントロ画面 */
+    .intro-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      animation: fadeIn 1s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      animation: bounceIn 1s ease-out 0.3s both;
+    }
+
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.3);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+      70% {
+        transform: scale(0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .intro-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: #333;
+      margin-bottom: 15px;
+      animation: slideInUp 1s ease-out 0.5s both;
+    }
+
+    .intro-subtitle {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 40px;
+      line-height: 1.6;
+      animation: slideInUp 1s ease-out 0.7s both;
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .start-btn {
+      background: #7b2c40;
+      color: white;
+      border: none;
+      padding: 18px 50px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(123, 44, 64, 0.3);
+      animation: slideInUp 1s ease-out 0.9s both;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(123, 44, 64, 0.4);
+      background: #692638;
+    }
+
+    /* メイン診断画面 */
+    .main-screen {
+      display: none;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+      color: #7b2c40;
+      font-size: 26px;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .progress-container {
+      margin-bottom: 40px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #f8f8f8;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #7b2c40;
+      border-radius: 10px;
+      transition: width 0.6s ease;
+      width: 0%;
+    }
+
+    .progress-text {
+      text-align: center;
+      margin-top: 10px;
+      color: #7b2c40;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .question-container {
+      animation: fadeInScale 0.5s ease-out;
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .question-number {
+      display: inline-block;
+      background: #7b2c40;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .question {
+      font-size: 22px;
+      color: #333;
+      margin-bottom: 35px;
+      line-height: 1.6;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .question:hover {
+      color: #a53850;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 18px 35px;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      max-width: 180px;
+    }
+
+    .btn-yes {
+      background: #7b2c40;
+      color: white;
+      box-shadow: 0 6px 20px rgba(123, 44, 64, 0.3);
+    }
+
+    .btn-no {
+      background: white;
+      color: #7b2c40;
+      border: 2px solid #7b2c40;
+      box-shadow: 0 6px 20px rgba(123, 44, 64, 0.1);
+    }
+
+    .btn-yes:hover {
+      transform: translateY(-2px);
+      background: #692638;
+      box-shadow: 0 8px 25px rgba(123, 44, 64, 0.4);
+    }
+
+    .btn-no:hover {
+      transform: translateY(-2px);
+      background: #faf5f6;
+      box-shadow: 0 8px 25px rgba(123, 44, 64, 0.2);
+    }
+
+    .btn-back {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-btn {
+      background: none;
+      color: #888;
+      border: none;
+      font-size: 14px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: #888;
+      padding: 8px 16px;
+      display: inline-block;
+    }
+
+    .back-btn:hover {
+      color: #666;
+      text-decoration-color: #666;
+    }
+
+    .result-container {
+      text-align: center;
+      animation: bounceIn 0.8s ease-out;
+    }
+
+    .result-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      margin: 0 auto 20px auto;
+      display: block;
+    }
+
+    .result-text {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .result-type {
+      display: inline-block;
+      background: #7b2c40;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-size: 24px;
+      margin-bottom: 25px;
+      font-weight: 700;
+      box-shadow: 0 8px 25px rgba(123, 44, 64, 0.3);
+    }
+
+    .recommend-section {
+      background: #fefcfe;
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 25px;
+      border: 1px solid #fef7f7;
+    }
+
+    .recommend-title {
+      font-size: 18px;
+      color: #7b2c40;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .counter-message {
+      font-size: 16px;
+      color: #333;
+      line-height: 1.8;
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #f0f0f0;
+    }
+
+    .counter-message strong {
+      color: #7b2c40;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    /* 팝업 모달 */
+    #storeMapModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #storeMapModal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 700px;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .close-btn {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      font-size: 30px;
+      font-weight: bold;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s ease;
+      background: none;
+      border: none;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn:hover {
+      color: #7b2c40;
+    }
+
+    .modal-title {
+      text-align: center;
+      font-size: 24px;
+      color: #7b2c40;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    /* 매장 약도 CSS */
+    .store-layout {
+      background: 
+        repeating-linear-gradient(
+          0deg,
+          #fafafa,
+          #fafafa 20px,
+          #f5f5f5 20px,
+          #f5f5f5 21px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          #fafafa,
+          #fafafa 20px,
+          #f5f5f5 20px,
+          #f5f5f5 21px
+        );
+      border: 3px solid #d8b5bf;
+      border-radius: 20px;
+      padding: 40px 30px 45px 30px;
+      margin: 20px 0;
+      position: relative;
+      box-shadow: 0 8px 25px rgba(123, 44, 64, 0.12);
+    }
+
+    .entrance-marker {
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #7b2c40 0%, #8d3348 100%);
+      color: white;
+      padding: 10px 30px 10px 45px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 16px;
+      box-shadow: 0 5px 15px rgba(123, 44, 64, 0.35);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .entrance-marker::before {
+      content: '🚪';
+      position: absolute;
+      left: 15px;
+      font-size: 20px;
+    }
+
+    .entrance-marker::after {
+      content: '⬇';
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #7b2c40;
+      font-size: 18px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(5px); }
+    }
+
+    /* 경로 화살표 */
+    .path-arrow {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      background-image: linear-gradient(
+        to bottom,
+        transparent 50%,
+        #7b2c40 50%
+      );
+      background-size: 2px 15px;
+      display: none;
+      z-index: 1;
+    }
+
+    .path-arrow::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 12px solid #7b2c40;
+    }
+
+    .path-arrow.show {
+      display: block;
+      animation: flowPath 2s linear infinite;
+    }
+
+    @keyframes flowPath {
+      0% {
+        background-position: 0 0;
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        background-position: 0 15px;
+        opacity: 0.3;
+      }
+    }
+
+    .path-arrow.path-1 {
+      top: 25px;
+      height: 55px;
+    }
+
+    .path-arrow.path-2 {
+      top: 25px;
+      height: 145px;
+    }
+
+    .path-arrow.path-3 {
+      top: 25px;
+      height: 235px;
+    }
+
+    .counters-area {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      margin-top: 45px;
+      width: 100%;
+      position: relative;
+    }
+
+    .counter-area {
+      width: 100%;
+      text-align: center;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 2;
+    }
+
+    .counter-symbol {
+      width: 50px;
+      height: 50px;
+      background: white;
+      border: 3px solid #7b2c40;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      position: absolute;
+      left: -25px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      z-index: 3;
+    }
+
+    .counter-display {
+      background: #ffffff;
+      border: 2px solid #e8d4d8;
+      border-radius: 18px;
+      padding: 20px 25px;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 80px;
+      margin-left: 40px;
+    }
+
+    .counter-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      flex: 1;
+    }
+
+    .counter-display:hover {
+      transform: translateX(3px);
+      box-shadow: 0 5px 18px rgba(123, 44, 64, 0.12);
+    }
+
+    .counter-display.active-acne {
+      background: linear-gradient(135deg, #fff5f7 0%, #ffe8ec 100%);
+      border-color: #ff6b8a;
+      border-width: 3px;
+      box-shadow: 0 0 25px rgba(255, 107, 138, 0.25);
+      transform: scale(1.03);
+    }
+
+    .counter-display.active-acne .here-marker {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #ff6b8a;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 18px;
+      font-weight: 700;
+      font-size: 15px;
+      animation: pulse 1.5s infinite;
+    }
+
+    .counter-display.active-acne .here-marker::before {
+      content: '📍';
+      font-size: 16px;
+    }
+
+    .counter-display.active-oily {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e8f5ff 100%);
+      border-color: #4a9eda;
+      border-width: 3px;
+      box-shadow: 0 0 25px rgba(74, 158, 218, 0.25);
+      transform: scale(1.03);
+    }
+
+    .counter-display.active-oily .here-marker {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #4a9eda;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 18px;
+      font-weight: 700;
+      font-size: 15px;
+      animation: pulse 1.5s infinite;
+    }
+
+    .counter-display.active-oily .here-marker::before {
+      content: '📍';
+      font-size: 16px;
+    }
+
+    .counter-display.active-dry {
+      background: linear-gradient(135deg, #f0fff4 0%, #e8ffef 100%);
+      border-color: #5fc77e;
+      border-width: 3px;
+      box-shadow: 0 0 25px rgba(95, 199, 126, 0.25);
+      transform: scale(1.03);
+    }
+
+    .counter-display.active-dry .here-marker {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #5fc77e;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 18px;
+      font-weight: 700;
+      font-size: 15px;
+      animation: pulse 1.5s infinite;
+    }
+
+    .counter-display.active-dry .here-marker::before {
+      content: '📍';
+      font-size: 16px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.9; }
+    }
+
+    .here-marker {
+      display: none;
+    }
+
+    .counter-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: #7b2c40;
+      margin-bottom: 5px;
+      letter-spacing: 0.3px;
+    }
+
+    .counter-desc {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.3;
+      font-weight: 500;
+    }
+
+    .restart-btn {
+      margin-top: 30px;
+      padding: 15px 40px;
+      background: #7b2c40;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(123, 44, 64, 0.3);
+    }
+
+    .restart-btn:hover {
+      background: #692638;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(123, 44, 64, 0.4);
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 25px;
+        margin: 10px;
+      }
+      
+      .intro-title {
+        font-size: 26px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .question {
+        font-size: 18px;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .btn {
+        max-width: none;
+        font-size: 16px;
+      }
+
+      /* 모바일에서도 세로 레이아웃 유지 */
+      .counters-area {
+        flex-direction: column !important;
+      }
+
+      .counter-number {
+        position: static;
+        margin-bottom: 10px;
+        display: inline-block;
+        width: auto;
+      }
+
+      .counter-area {
+        flex-direction: column;
+      }
+
+      .counter-display {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .counter-info {
+        align-items: center;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- イントロ画面 -->
+    <div id="introScreen" class="intro-screen">
+      <img src="https://dp.image-qoo10.jp/dp2016/JP/GMKT.IMG/front_image/minishop/2024/03/19/e3f368a7-3fa0-43ba-b542-a3f1ae8b686c.s_110-w-fs-st_s.jpg" alt="Logo" class="logo">
+      <h1 class="intro-title">肌タイプ診断テスト</h1>
+      <p class="intro-subtitle">簡単な質問に答えるだけで<br>あなたの肌タイプが確認できます</p>
+      <button class="start-btn" onclick="startTest()">スタート</button>
+    </div>
+
+    <!-- メイン診断画面 -->
+    <div id="mainScreen" class="main-screen">
+      <div class="header">
+        <h1>肌タイプ診断テスト</h1>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">1 / 7</div>
+      </div>
+      
+      <div id="questionArea"></div>
+      <div id="resultArea" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        text: "洗顔後に肌がつっぱりやすい",
+        score: {"脂性肌": 0, "混合肌": 1, "乾燥肌": 2, "敏感肌": 1, "ニキビ肌": 0}
+      },
+      {
+        text: "Tゾーン(おでこ、鼻)がテカりやすい",
+        score: {"脂性肌": 2, "混合肌": 1, "乾燥肌": 0, "敏感肌": 0, "ニキビ肌": 1}
+      },
+      {
+        text: "肌が刺激に弱く、赤みやかゆみが気になる",
+        score: {"脂性肌": 0, "混合肌": 0, "乾燥肌": 1, "敏感肌": 2, "ニキビ肌": 0}
+      },
+      {
+        text: "ニキビや吹き出物ができやすい",
+        score: {"脂性肌": 2, "混合肌": 1, "乾燥肌": 0, "敏感肌": 1, "ニキビ肌": 2}
+      },
+      {
+        text: "毛穴の詰まりや炎症が起こりやすい",
+        score: {"脂性肌": 2, "混合肌": 1, "乾燥肌": 0, "敏感肌": 0, "ニキビ肌": 2}
+      },
+      {
+        text: "季節の変わり目にトラブルが起こりやすい",
+        score: {"脂性肌": 0, "混合肌": 1, "乾燥肌": 1, "敏感肌": 2, "ニキビ肌": 1}
+      },
+      {
+        text: "肌がストレスを感じやすい",
+        score: {"脂性肌": 0, "混合肌": 0, "乾燥肌": 0, "敏感肌": 2, "ニキビ肌": 1}
+      }
+    ];
+
+    const counterMessages = {
+      "乾燥肌": "乾燥肌にオススメの商品は<br>入口から<strong>3番目</strong>のカウンターでご確認いただけます。",
+      "脂性肌": "脂性肌にオススメの商品は<br>入口から<strong>2番目</strong>のカウンターでご確認いただけます。",
+      "敏感肌": "敏感肌にオススメの商品は<br>入口から<strong>3番目</strong>のカウンターでご確認いただけます。",
+      "ニキビ肌": "ニキビ肌にオススメの商品は<br>入口から<strong>1番目</strong>のカウンターでご確認いただけます。",
+      "混合肌": "混合肌にオススメの商品は<br>入口から<strong>2番目</strong>のカウンターでご確認いただけます。"
+    };
+
+    const totals = {"脂性肌": 0, "混合肌": 0, "乾燥肌": 0, "敏感肌": 0, "ニキビ肌": 0};
+    let current = 0;
+
+    function startTest() {
+      document.getElementById('introScreen').style.display = 'none';
+      document.getElementById('mainScreen').style.display = 'block';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      if (current < questions.length) {
+        const q = questions[current];
+        document.getElementById('questionArea').innerHTML = `
+          <div class="question-container">
+            <div class="question-number">質問 ${current + 1}</div>
+            <div class="question">${q.text}</div>
+            <div class="btn-group">
+              <button class="btn btn-yes" onclick="answer(true)">はい</button>
+              <button class="btn btn-no" onclick="answer(false)">いいえ</button>
+            </div>
+            ${current > 0 ? '<div class="btn-back"><button class="back-btn" onclick="goBack()">← 前の質問に戻る</button></div>' : ''}
+          </div>`;
+        updateProgress();
+      } else {
+        showResult();
+      }
+    }
+
+    function answer(isYes) {
+      if (isYes) {
+        const q = questions[current];
+        for (let type in q.score) {
+          totals[type] += q.score[type];
+        }
+      }
+      current++;
+      showQuestion();
+    }
+
+    function updateProgress() {
+      const progress = ((current + 1) / questions.length) * 100;
+      document.getElementById('progressBar').style.width = progress + "%";
+      document.getElementById('progressText').textContent = `${current + 1} / ${questions.length}`;
+    }
+
+    function showResult() {
+      document.getElementById('questionArea').style.display = "none";
+      const resultType = getResultType();
+      const message = counterMessages[resultType] || "おすすめ商品については、店舗スタッフにお尋ねください。";
+
+      document.getElementById('resultArea').style.display = "block";
+      document.getElementById('resultArea').innerHTML = `
+        <div class="result-container">
+          <img src="https://dp.image-qoo10.jp/dp2016/JP/GMKT.IMG/front_image/minishop/2024/03/19/e3f368a7-3fa0-43ba-b542-a3f1ae8b686c.s_110-w-fs-st_s.jpg" alt="Logo" class="result-logo">
+          <div class="result-text">あなたの肌タイプは</div>
+          <div class="result-type">${resultType}</div>
+          <div class="recommend-section">
+            <div class="recommend-title">おすすめ商品</div>
+            <div class="counter-message">${message}</div>
+          </div>
+          <button class="restart-btn" onclick="restart()">もう一度診断する</button>
+        </div>`;
+      
+      document.getElementById('progressBar').style.width = "100%";
+      document.getElementById('progressText').textContent = "完了！";
+    }
+
+    function getResultType() {
+      let max = -1;
+      let best = "乾燥肌";
+      const priority = ["敏感肌", "ニキビ肌", "乾燥肌", "脂性肌", "混合肌"];
+      
+      for (let type in totals) {
+        if (totals[type] > max) {
+          max = totals[type];
+          best = type;
+        } else if (totals[type] === max && priority.indexOf(type) < priority.indexOf(best)) {
+          best = type;
+        }
+      }
+      
+      return best;
+    }
+
+    function restart() {
+      for (let type in totals) {
+        totals[type] = 0;
+      }
+      current = 0;
+      document.getElementById('resultArea').style.display = "none";
+      document.getElementById('questionArea').style.display = "block";
+      document.getElementById('introScreen').style.display = 'flex';
+      document.getElementById('mainScreen').style.display = 'none';
+    }
+
+    function goBack() {
+      if (current > 0) {
+        current--;
+        const prevQuestion = questions[current];
+        for (let type in prevQuestion.score) {
+          totals[type] -= prevQuestion.score[type];
+        }
+        showQuestion();
+      }
+    }
+
+    // 모달 밖 클릭시 닫기
+    window.onclick = function(event) {
+      const modal = document.getElementById('storeMapModal');
+      if (event.target == modal) {
+        closeModal();
+      }
+    }
+  </script>
+</body>
+</html>
